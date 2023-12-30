@@ -1,7 +1,8 @@
 import tkinter
 from tkinter import messagebox
-# ---------------------------- PASSWORD GENERATOR ------------------------------- #
+import json
 import random
+# ---------------------------- PASSWORD GENERATOR ------------------------------- #
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 symbols = ['!', '#', '$', '%', '&', '(', ')', '*', '+']
@@ -39,14 +40,32 @@ def save():
     website = website_entry.get()
     email = email_entry.get()
     password = password_entry.get()
+    new_data = {website:{
+        'email': email,
+        "password":password
+    }}
     if website == '' or email == '' or password == '':
         messagebox.showerror('Something went wrong', 'Please fill all fields')
     else:
         messagebox.showinfo("Success",'Password has been saved!')
         website_entry.delete(0,tkinter.END)
         password_entry.delete(0,tkinter.END)
-        with open("data.txt",'a') as data:
-            data.write(f"{website} | {email} | {password}\n")
+        try:
+            with open("data.json",'r') as data_file:
+                data = json.load(data_file)
+                data.update(new_data)
+
+            with open("data.json",'w') as data_file:
+                json.dump(data,data_file,indent=4)
+        except:
+            with open("data.json",'w') as data_file:
+                json.dump(new_data,data_file,indent=4)
+def find_password():
+    website = website_entry.get()
+    with open("data.json",'r') as data_file:
+        data = json.load(data_file)
+        password = data[website]['password']
+        password_entry.insert(0,password)
 # ---------------------------- UI SETUP ------------------------------- #
 # window and logo
 window = tkinter.Tk()
@@ -65,6 +84,8 @@ password_label = tkinter.Label(text='Password')
 password_label.grid(column=0,row=3)
 website_entry = tkinter.Entry(width=35)
 website_entry.grid(column=1,row=1,columnspan=2)
+get_password_button = tkinter.Button(text='Get password',width=14,command=find_password)
+get_password_button.grid(column=2,row=1)
 email_entry = tkinter.Entry(width=35)
 email_entry.insert(0,'shashkou.yan@gmail.com')
 email_entry.grid(column=1,row=2,columnspan=2)
